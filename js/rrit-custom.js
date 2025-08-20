@@ -41,6 +41,7 @@ const STORAGE_KEY = "rrit_savedScenario_v2";
 
 const RRITState = {
     isEditing: false,
+    summaryGenerated: false,
     setEditMode(value) {
         this.isEditing = value;
         handleButtonVisibility(value);
@@ -89,6 +90,8 @@ function saveScenario(responses) {
 function clearScenario() {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    // Reset the summary generated flag
+    RRITState.summaryGenerated = false;
   } catch (err) {
     console.warn("[RRIT] Failed to clear scenario from storage.");
   }
@@ -332,6 +335,9 @@ function generateSummaryTable() {
   console.log("[RRIT] Collected responses:", responses);
   window.collectedResponses = responses;
 
+  // Mark that a summary has been generated
+  RRITState.summaryGenerated = true;
+
   setVis(qs("#summaryTableContainer"), true);
   setVis(qs("#rrit-intro"), false);
   setVis(qs("#step0"), false);
@@ -359,7 +365,7 @@ function handleButtonVisibility(isEditing) {
         generateSummaryBtn: isEditing,
         editAnswersBtn: !isEditing,
         newScenarioBtn: !isEditing,
-        printSummaryBtn: true
+        printSummaryBtn: !isEditing && RRITState.summaryGenerated
     };
 
     const summaryActionRow = qs("#summaryActionRow");
