@@ -890,7 +890,16 @@ plus start of summary/results bar
                 aria-hidden="true"
                 type="button"
                 aria-label="Print or save as PDF">
-          Print / Save as PDF
+          <span data-lang="en">Print Summary</span>
+          <span data-lang="fr" class="hidden">Imprimer le sommaire</span>
+        </button>
+        <button id="printDetailedAnnexBtn"
+                class="btn btn-secondary hidden"
+                aria-hidden="true"
+                type="button"
+                aria-label="Print detailed annex">
+          <span data-lang="en">Print Detailed Annex</span>
+          <span data-lang="fr" class="hidden">Imprimer l'annexe détaillée</span>
         </button>
       </div>
     </div>
@@ -912,6 +921,20 @@ plus start of summary/results bar
         <tbody id="summaryTableBody"></tbody>
       </table>
     </div>
+    
+    <!-- Hidden section for detailed annex printing -->
+    <section id="detailedAnnex" class="hidden">
+      <h2>
+        <span data-lang="en">Detailed Risk Assessment Annex</span>
+        <span data-lang="fr" class="hidden">Annexe détaillée d'évaluation des risques</span>
+      </h2>
+      <p>
+        <span data-lang="en">The following questions require attention based on responses indicating potential risks:</span>
+        <span data-lang="fr" class="hidden">Les questions suivantes nécessitent une attention particulière basée sur les réponses indiquant des risques potentiels :</span>
+      </p>
+      <div id="detailedAnnexContent"></div>
+    </section>
+    
     <details id="riskSummaryHelp" class="hidden">
       <summary id="riskSummaryHelpLabel">📘 How to interpret the Risk Summary</summary>
       <div id="riskHelpEN">
