@@ -350,6 +350,54 @@ function generateSummaryTable() {
   saveScenario(responses);
 }
 
+function populateDetailedAnnex() {
+  const lang = currentLang;
+  const content = qs("#detailedAnnexContent");
+  
+  if (!content || !window.collectedResponses) {
+    console.error("[RRIT] Cannot populate detailed annex - missing content container or responses");
+    return;
+  }
+  
+  content.innerHTML = "";
+  
+  // Filter for flagged questions (those with risk-indicating answers)
+  window.collectedResponses.forEach(categoryData => {
+    const flaggedQuestions = categoryData.questions.filter(q => 
+      /^(No|Non|Unknown|Inconnu)$/.test(q.answer)
+    );
+    
+    if (flaggedQuestions.length > 0) {
+      // Add category heading
+      const categorySection = document.createElement('div');
+      categorySection.className = 'annex-category';
+      categorySection.innerHTML = `
+        <h3>${categoryData.category}</h3>
+        <div class="annex-questions">
+          ${flaggedQuestions.map(q => `
+            <div class="annex-question">
+              <p><strong>${lang === 'en' ? 'Question' : 'Question'} ${q.qid}:</strong> ${q.question}</p>
+              <p><strong>${lang === 'en' ? 'Response' : 'Réponse'}:</strong> <span class="risk-response">${q.answer}</span></p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      content.appendChild(categorySection);
+    }
+  });
+  
+  // If no flagged questions, show a message
+  if (content.children.length === 0) {
+    const noIssuesMsg = document.createElement('p');
+    noIssuesMsg.innerHTML = lang === 'en' 
+      ? '<em>No risk-indicating responses found. All answers suggest low risk or are not applicable.</em>'
+      : '<em>Aucune réponse indiquant un risque trouvée. Toutes les réponses suggèrent un faible risque ou ne sont pas applicables.</em>';
+    content.appendChild(noIssuesMsg);
+  }
+  
+  console.log("[RRIT] Detailed annex populated with flagged questions");
+}
+
 /* =========================================================
    Section 5: UI Management and Button Visibility
    ========================================================= */
@@ -359,7 +407,8 @@ function handleButtonVisibility(isEditing) {
         generateSummaryBtn: isEditing,
         editAnswersBtn: !isEditing,
         newScenarioBtn: !isEditing,
-        printSummaryBtn: true
+        printSummaryBtn: true,
+        printDetailedAnnexBtn: true
     };
 
     const summaryActionRow = qs("#summaryActionRow");
@@ -524,6 +573,32 @@ function initializeEventListeners() {
                 window.print();
                 setTimeout(() => {
                     document.documentElement.removeAttribute('data-print-lang');
+                    qsa('#projectInfo fieldset[data-content]').forEach(fieldset => {
+                        fieldset.removeAttribute('data-content');
+                    });
+                }, 500);
+            }, 100);
+        },
+        printDetailedAnnexBtn: () => {
+            document.documentElement.setAttribute('data-print-lang', currentLang);
+            populateDetailedAnnex();
+            
+            // Set project info field content for the annex print
+            qsa('#projectInfo input[type="text"], #projectInfo input[type="date"], #projectInfo textarea').forEach(input => {
+                const fieldset = input.closest('fieldset');
+                if (fieldset && input.value && input.value.trim()) {
+                    fieldset.setAttribute('data-content', input.value);
+                }
+            });
+            
+            // Mark body for annex printing
+            document.body.setAttribute('data-print-mode', 'annex');
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.documentElement.removeAttribute('data-print-lang');
+                    document.body.removeAttribute('data-print-mode');
                     qsa('#projectInfo fieldset[data-content]').forEach(fieldset => {
                         fieldset.removeAttribute('data-content');
                     });
@@ -787,20 +862,34 @@ function updateButtonText() {
             generateSummaryBtn: RRITState.isEditing ? "Generate Updated Summary" : "Generate Summary",
             editAnswersBtn: "Edit Answers",
             newScenarioBtn: "Start New Scenario",
-            printSummaryBtn: "Print / Save as PDF"
+            printSummaryBtn: "Print Summary",
+            printDetailedAnnexBtn: "Print Detailed Annex"
         },
         fr: {
             generateSummaryBtn: RRITState.isEditing ? "Générer le sommaire mis à jour" : "Générer le sommaire",
             editAnswersBtn: "Modifier les réponses",
             newScenarioBtn: "Nouveau scénario",
-            printSummaryBtn: "Imprimer / Sauvegarder en PDF"
+            printSummaryBtn: "Imprimer le sommaire",
+            printDetailedAnnexBtn: "Imprimer l'annexe détaillée"
         }
     };
     
+    // Handle buttons with language-specific spans
     Object.entries(buttonTexts[currentLang]).forEach(([id, text]) => {
         const btn = qs(`#${id}`);
         if (btn) {
-            btn.textContent = text;
+            // Check if button has language spans
+            const enSpan = btn.querySelector('[data-lang="en"]');
+            const frSpan = btn.querySelector('[data-lang="fr"]');
+            
+            if (enSpan && frSpan) {
+                // Update span content instead of button textContent
+                enSpan.textContent = buttonTexts.en[id];
+                frSpan.textContent = buttonTexts.fr[id];
+            } else {
+                // Fallback to direct text content for buttons without spans
+                btn.textContent = text;
+            }
         }
     });
 }

@@ -478,6 +478,70 @@ legend{font-weight:700; border:none; border-bottom: none;}
     background-color: #f0f0f0 !important; /* Light gray */
     color: #666666 !important; /* Gray */
   }
+
+  /* Detailed Annex print styles */
+  /* Show detailed annex instead of summary when in annex print mode */
+  body[data-print-mode="annex"] #summaryTableContainer,
+  body[data-print-mode="annex"] #riskSummaryHelp {
+    display: none !important;
+  }
+  
+  body[data-print-mode="annex"] #detailedAnnex {
+    display: block !important;
+  }
+  
+  /* Normal print mode - hide annex */
+  body:not([data-print-mode="annex"]) #detailedAnnex {
+    display: none !important;
+  }
+  
+  /* Annex content styling */
+  #detailedAnnex h2 {
+    font-size: 12pt;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+  }
+  
+  .annex-category {
+    margin-bottom: 1.5rem;
+    page-break-inside: avoid;
+  }
+  
+  .annex-category h3 {
+    font-size: 10pt;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .annex-question {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-left: 3px solid #ccc;
+    background-color: #f9f9f9;
+    page-break-inside: avoid;
+  }
+  
+  .annex-question p {
+    margin: 0.25rem 0;
+    font-size: 8pt;
+    line-height: 1.4;
+  }
+  
+  .risk-response {
+    color: #d63384;
+    font-weight: bold;
+  }
+  
+  /* Override page title for annex */
+  body[data-print-mode="annex"] html[data-print-lang="en"]:before {
+    content: "Detailed Risk Assessment Annex";
+  }
+  
+  body[data-print-mode="annex"] html[data-print-lang="fr"]:before {
+    content: "Annexe détaillée d'évaluation des risques";
+  }
 }
 
 /* Language switcher styling */
